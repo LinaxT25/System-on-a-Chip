@@ -24,5 +24,11 @@ end entity;
 
 architecture behavioral of memory is
 begin
+    -- seta o endereço de memoria apontado por ele
+    -- data_addr 
+    -- read(arq_load, data_in(i))
+    -- write()
+    -- file_open(read_mode)
+
     data_out <= data_in when data_read = '0' and data_write = '1' and falling_edge(clock);
 end architecture;
