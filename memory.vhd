@@ -31,29 +31,25 @@ architecture behavioral of memory is
     -- type data_vet_t is array (data_width - 1 downto 0) of std_logic;
     -- type dt_vet_t is array((2**data_width) downto 0) of data_vet_t;
     type data_vet_t is array (2**data_width downto 0) of std_logic_vector(data_width - 1 downto 0); 
-    signal data_vet : data_vet_t := (others => (others => '0'));
+    signal data_vet : data_vet_t := (others => "00000000");--(others => "00000000"));
     signal a : std_logic;
 begin
-    read_d: process (data_read) is
+    whole_p: process (clock) is
         begin
             -- the read part is almost compleated, it has right casts for the range of the first dimension
             -- now, I need to see if it is going to get que right slice of each part
             if data_read = '1' and data_write = '0' then
                 -- d 4x 7 a 0                      d 7 a 0
-                data_out(data_width-1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
-                data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
-                data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2));
-                data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr) + 3));
-            else
-                a <= '0';     
-            end if;
-        end process;
-    write_d: process (data_write) is
-        begin
-            if data_read = '0' and data_write = '1' and falling_edge(clock) then
+                data_out(data_width-1 downto 0) <= data_vet(to_integer(unsigned(data_addr)))(data_width-1 downto 0);
+                data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1))(data_width-1 downto 0);
+                data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2))(data_width-1 downto 0);
+                data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr) + 3))(data_width-1 downto 0);
+                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr))))));
+                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr) + 1)))));
+                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr) + 2)))));
+                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr) + 3)))));
+            elsif falling_edge(clock) and data_read = '0' and data_write = '1' then
                 data_vet(to_integer(unsigned(data_addr))) <= data_in;
-            else
-                a <= '0';
             end if;
         end process;
 end architecture;
