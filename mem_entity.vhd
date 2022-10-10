@@ -51,13 +51,12 @@ begin
     write_d: process (data_write) is
         begin
             if data_read = '0' and data_write = '1' and falling_edge(clock) then
-                a <= '1';
                 data_vet(to_integer(unsigned(data_addr))) <= data_in;
-                data_out(data_width-1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
+                --data_out(data_width-1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
                 -- make a new verification if it is in the length 
-                data_out(data_width*2 - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
-                data_out(data_width*3 - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2));
-                data_out(data_width*4 - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr) + 3));
+                --data_out(data_width*2 - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
+                --data_out(data_width*3 - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2));
+                --data_out(data_width*4 - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr) + 3));
             else
                 a <= '0';
             end if;
