@@ -29,9 +29,21 @@ begin
         -- ck read write      address           input                 output
         ( ('1', '0', '1', "0000000000000000", "10000001", "00000000000000000000000000000000"),
           ('0', '1', '0', "0000000000000000", "10000001", "00000000000000000000000010000001"),
-          ('1', '0', '1', "0000000000000000", "01111110", "00000000000000000000000010000001"),
-          );
+          ('1', '0', '1', "0000000000000001", "01111110", "00000000000000000000000010000001"),
+          ('0', '1', '0', "0000000000000000", "01111110", "00000000000000000111111010000001"),
+          ('1', '0', '0', "0000000000000000", "01111110", "00000000000000000111111010000001"));
     begin
-
+        for i in tb'range loop
+            clock <= tb(i).ck;
+            data_read <= tb(i).dt_r;
+            data_write <= tb(i).dt_w;
+            data_addr <= tb(i).dt_addr;
+            data_in <= tb(i).dt_in;
+            data_out <= tb(i).dt_out;
+            wait for 1 ns;
+            assert data_out = tb(i).dt_out report "Wilson fez cagada!" severity error;
+        end loop;
+        report "Fim dos Testes";
+        wait;
     end process;
 end architecture;
