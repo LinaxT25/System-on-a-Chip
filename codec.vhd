@@ -44,9 +44,12 @@ architecture behavioral of codec is
 begin
     in_out: process (interrupt) is
     begin
-        if read_signal = '1' and write_signal = '0' then
+        if read_signal = '1' and write_signal = '0' and interrupt = '1' then
             read_file;
+            valid <= '1';
+        elsif read_signal = '0' and write_signal = '1' and interrupt = '1' then
+            write_file;
+            valid <= '1';
         end if;
     end process;
-    valid <= '1';
 end architecture;
