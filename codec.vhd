@@ -15,3 +15,17 @@ entity codec is
         codec_data_out : out std_logic_vector(7 downto 0)
     );
 end entity;
+
+architecture behavioral of codec is
+
+begin
+    archive_inout: process (interrupt)
+    begin
+
+
+
+
+
+        valid <= true;   
+    end process;
+end architecture;
