@@ -27,12 +27,8 @@ architecture behavioral of memory is
     -- aparently it doesn't need to be first a type because we're
     -- declaring a mult dimensional vector. hope it works
     -- needs to change the address range (first dimension)
-    -- type data_vet_t is array ((2**data_width) downto 0, data_width - 1 downto 0) of std_logic;
-    -- type data_vet_t is array (data_width - 1 downto 0) of std_logic;
-    -- type dt_vet_t is array((2**data_width) downto 0) of data_vet_t;
     type data_vet_t is array (2**data_width downto 0) of std_logic_vector(data_width - 1 downto 0); 
-    signal data_vet : data_vet_t := (others => "00000000");--(others => "00000000"));
-    signal a : std_logic;
+    signal data_vet : data_vet_t := (others => "00000000");
 begin
     whole_p: process (clock) is
         begin
@@ -44,10 +40,6 @@ begin
                 data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1))(data_width-1 downto 0);
                 data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2))(data_width-1 downto 0);
                 data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr) + 3))(data_width-1 downto 0);
-                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr))))));
-                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr) + 1)))));
-                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr) + 2)))));
-                report integer'image(to_integer(unsigned(data_vet(to_integer(unsigned(data_addr) + 3)))));
             elsif falling_edge(clock) and data_read = '0' and data_write = '1' then
                 data_vet(to_integer(unsigned(data_addr))) <= data_in;
             end if;

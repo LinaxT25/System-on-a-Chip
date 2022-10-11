@@ -12,7 +12,7 @@ architecture mixed of mem_tb is
     signal clock, data_read, data_write : std_logic;
     signal data_addr :  std_logic_vector(addr_width-1 downto 0);
     signal data_in :    std_logic_vector(data_width-1 downto 0);
-    signal data_out :   std_logic_vector((data_width*4)-1 downto 0) := (others => '0') ;
+    signal data_out :   std_logic_vector((data_width*4)-1 downto 0); -- possivel others
 begin
     mem_t:  entity work.memory(behavioral)
             generic map (addr_width, data_width)
@@ -25,14 +25,15 @@ begin
             dt_in   : std_logic_vector(data_width-1 downto 0);
             dt_out  : std_logic_vector((data_width*4)-1 downto 0);
         end record;
-        type vet_l_tv is array (0 to 4) of line_tv;
+        type vet_l_tv is array (0 to 5) of line_tv;
         constant tb : vet_l_tv :=
         -- ck read write      address           input                 output
-        ( ('1', '0', '1', "0000000000000000", "10000001", "00000000000000000000000000000000"),
-          ('0', '1', '0', "0000000000000000", "10000001", "00000000000000000000000010000001"),
-          ('1', '0', '1', "0000000000000001", "01111110", "00000000000000000000000010000001"),
-          ('0', '1', '0', "0000000000000000", "01111110", "00000000000000000111111010000001"),
-          ('1', '0', '0', "0000000000000000", "01111110", "00000000000000000111111010000001"));
+        ( ('1', '1', '0', "0000000000000000", "00000000", "00000000000000000000000000000000"),
+          ('0', '0', '1', "0000000000000000", "10000001", "00000000000000000000000000000000"),
+          ('1', '1', '0', "0000000000000000", "10000001", "00000000000000000000000010000001"),
+          ('0', '0', '1', "0000000000000001", "01111110", "00000000000000000000000010000001"),
+          ('1', '1', '0', "0000000000000000", "01111110", "00000000000000000111111010000001"),
+          ('0', '0', '0', "0000000000000000", "01111110", "00000000000000000111111010000001"));
     begin
         for i in tb'range loop
             clock <= tb(i).ck;
