@@ -17,28 +17,25 @@ entity codec is
 end entity;
 
 architecture behavioral of codec is
-    type vet_int is array(7 downto 0) of integer;
     
+    --Function to read files(only read 1 byte)
     impure function read_array(nome_arq : string)
-        return vet_int is
-            type t_arq is file of integer;
+        return std_logic_vector is
+            type t_arq is file of std_logic_vector;
             file arq_int : t_arq open read_mode is nome_arq;
-            variable result : vet_int := (others => 0);
-            variable i : natural := 1;
+            variable result : std_logic_vector(7 downto 0);
         begin
-            while not endfile(arq_int) and i <= 8 loop
-                read(arq_int, result(i));
-                i := i + 1;
+            while not endfile(arq_int) loop
+                read(arq_int, result);
             end loop;
             return result;
     end function read_array;
 
 begin
     archive_inout: process (interrupt)
-        variable dados : vet_int;
     begin
         if read_signal = '1' and write_signal = '0' then
-           dados := read_array("dados.dat");
+           codec_data_out <= read_array("dados.dat");
         end if;
     end process;
     valid <= '1'; 
