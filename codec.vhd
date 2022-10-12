@@ -1,5 +1,6 @@
 library ieee, std;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 use std.textio.all;
 
 entity codec is
@@ -16,39 +17,24 @@ entity codec is
     );
 end entity;
 
-architecture behavioral of codec is
-    type r_arq is file of integer;
-    type w_arq is file of character;
-    type vet_int is array(7 downto 0) of integer;
-
-    procedure read_file is
-        file arq : r_arq open read_mode is "dados.dat";
-        variable output : vet_int;
-        variable char : integer;
-        variable index : integer := 0;
-    begin
-        while index < 8 loop
-        read(arq, char);
-        output(index) := char;
-        index := index + 1;
-    end loop;
-    end procedure read_file;
-
-    procedure write_file is
-        file arq : w_arq open write_mode is "dados.dat";
-        variable char : character;
-    begin
-        write(arq,char);
-    end procedure;
-
+architecture behavioral of codec is         
 begin
     in_out: process (interrupt) is
+        variable write_aux : Bit_vector(7 downto 0);
+        variable rreeaad_char : Bit_vector(7 downto 0);
+        variable write_line, read_line : line;
+        file arq_r : text open read_mode is "dados.txt";
+        file arq_w: text open write_mode is "escrita.txt";
     begin
         if read_signal = '1' and write_signal = '0' and interrupt = '1' then
-            read_file;
+            readline(arq_r, read_line);
+            read(read_line, rreeaad_char);
+            codec_data_out <= to_stdlogicvector(rreeaad_char);
             valid <= '1';
         elsif read_signal = '0' and write_signal = '1' and interrupt = '1' then
-            write_file;
+            write_aux := to_bitvector(codec_data_in);
+            write(write_line, write_aux);
+            writeline(arq_w, write_line);
             valid <= '1';
         end if;
     end process;

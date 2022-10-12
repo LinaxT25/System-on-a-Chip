@@ -41,7 +41,6 @@ begin
             data_write <= tb(i).dt_w;
             data_addr <= tb(i).dt_addr;
             data_in <= tb(i).dt_in;
-            data_out <= tb(i).dt_out;
             wait for 1 ns;
             assert data_out = tb(i).dt_out
             report "tb_data_out: " & integer'image(to_integer(unsigned(tb(i).dt_out))) & ", data_out_gerado: " & 
