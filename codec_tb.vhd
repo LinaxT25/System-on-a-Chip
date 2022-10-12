@@ -18,10 +18,11 @@ begin
             inte, rd_s, wr_s, v : std_logic;
             c_dt_in, c_dt_out : std_logic_vector(7 downto 0);
         end record;
-        type vet_l_tv is array (0 to 5) of line_tv;
+        type vet_l_tv is array (0 to 1) of line_tv;
         constant tb : vet_l_tv :=
         --   IN  read  write valid   CDI         CDO
-        (   ('1', '1', '0', '1', "00000000", "00000000" ));
+        (   ('1', '1', '0', '1', "00000000", "10000001" ),
+            ('1', '1', '0', '1', "00000000", "01111110" ));
     begin
         for i in tb'range loop
             interrupt <= tb(i).inte;
@@ -31,8 +32,8 @@ begin
             codec_data_in <= tb(i).c_dt_in;
       
             wait for 1 ns;
-            assert codec_data_out = tb(i).dt_out
-            report "YAMETE KUDASAI"
+            assert codec_data_out = tb(i).c_dt_out
+            report "YAMETE KUDASAI " & integer'image(i)
             severity error;
         end loop;
         report "Fim dos Testes";

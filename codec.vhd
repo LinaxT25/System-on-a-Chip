@@ -17,14 +17,14 @@ entity codec is
     );
 end entity;
 
-architecture behavioral of codec is         
+architecture behavioral of codec is
+    file arq_r : text open read_mode is "dados.txt";
+    file arq_w: text open write_mode is "escrita.txt"; 
 begin
     in_out: process (interrupt) is
         variable write_aux : Bit_vector(7 downto 0);
         variable rreeaad_char : Bit_vector(7 downto 0);
-        variable write_line, read_line : line;
-        file arq_r : text open read_mode is "dados.txt";
-        file arq_w: text open write_mode is "escrita.txt";
+        variable write_line, read_line : line; 
     begin
         if read_signal = '1' and write_signal = '0' and interrupt = '1' then
             readline(arq_r, read_line);
