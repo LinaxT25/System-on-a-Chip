@@ -26,14 +26,14 @@ begin
         variable rreeaad_char : Bit_vector(7 downto 0);
         variable write_line, read_line : line; 
     begin
-        if read_signal = '1' and write_signal = '0' and interrupt = '1' then
+        if read_signal = '1' and write_signal = '0' and rising_edge(interrupt) then
             readline(arq_r, read_line);
             read(read_line, rreeaad_char);
             codec_data_out <= to_stdlogicvector(rreeaad_char);
             valid <= '1';
-        elsif read_signal = '0' and write_signal = '1' and interrupt = '1' then
-            write_aux := to_bitvector(codec_data_in);
-            write(write_line, write_aux);
+        end if;
+        if read_signal = '0' and write_signal = '1' and rising_edge(interrupt) then
+            write(write_line, to_bitvector(codec_data_in));
             writeline(arq_w, write_line);
             valid <= '1';
         end if;

@@ -26,11 +26,11 @@ architecture behavioral of memory is
     -- create a new variable data_vet : little_data_vet type (addr_width - 1 downto 0);
     -- aparently it doesn't need to be first a type because we're
     -- declaring a mult dimensional vector. hope it works
-    -- needs to change the address range (first dimension)
-    type data_vet_t is array (2**data_width downto 0) of std_logic_vector(data_width - 1 downto 0); 
+    -- needs to change the address range (first dimension) 
+    type data_vet_t is array (2**addr_width downto 0) of std_logic_vector(data_width - 1 downto 0); 
     signal data_vet : data_vet_t := (others => "00000000");
 begin
-    whole_p: process (clock) is
+    whole_p: process (clock, data_read) is
         begin
             -- the read part is almost compleated, it has right casts for the range of the first dimension
             -- now, I need to see if it is going to get que right slice of each part

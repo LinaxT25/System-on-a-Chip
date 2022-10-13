@@ -18,23 +18,46 @@ begin
             inte, rd_s, wr_s, v : std_logic;
             c_dt_in, c_dt_out : std_logic_vector(7 downto 0);
         end record;
-        type vet_l_tv is array (0 to 1) of line_tv;
+        type vet_l_tv is array (0 to 23) of line_tv;
         constant tb : vet_l_tv :=
-        --   IN  read  write valid   CDI         CDO
-        (   ('1', '1', '0', '1', "00000000", "10000001" ),
-            ('1', '1', '0', '1', "00000000", "01111110" ));
+        --   IN  read  write valid CodInput   CodOut
+        (   ('0', '0', '0', '0', "00000000", "00000000" ),
+            ('1', '1', '0', '1', "00000000", "10000001" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '1', '0', '1', "00000000", "01111110" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '1', '0', '1', "00000000", "11110000" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '1', '0', '1', "00000000", "00001111" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '1', '0', '1', "00000000", "10101010" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '1', '0', '1', "00000000", "01010101" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '0', '1', '1', "10000001", "00000000" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '0', '1', '1', "01111110", "00000000" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '0', '1', '1', "11110000", "00000000" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '0', '1', '1', "00001111", "00000000" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '0', '1', '1', "10101010", "00000000" ),
+            ('0', '0', '0', '0', "00000000", "00000000" ), -- pulse simulation
+            ('1', '0', '1', '1', "01010101", "00000000" ));
     begin
         for i in tb'range loop
             interrupt <= tb(i).inte;
             read_signal <= tb(i).rd_s;
             write_signal <= tb(i).wr_s;
-            valid <= tb(i).v;
             codec_data_in <= tb(i).c_dt_in;
       
-            wait for 1 ns;
-            assert codec_data_out = tb(i).c_dt_out
-            report "YAMETE KUDASAI " & integer'image(i)
-            severity error;
+            wait for 2 ns;
+            if tb(i).wr_s = '0' and tb(i).inte = '1' then
+                assert codec_data_out = tb(i).c_dt_out
+                report "YAMETE KUDASAI" & integer'image(i)
+                severity error;
+            end if; 
         end loop;
         report "Fim dos Testes";
         wait;
