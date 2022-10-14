@@ -52,16 +52,11 @@ begin
                     data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
                     data_out((data_width*3) - 1 downto data_width*2) <= data_help;
                     data_out((data_width*4) - 1 downto data_width*3) <= data_help;
-                elsif to_integer(unsigned(data_addr)) = (2**addr_width - 3) then
+                else
                     data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
                     data_out((data_width*2) - 1 downto data_width) <= data_help;
                     data_out((data_width*3) - 1 downto data_width*2) <= data_help;
-                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;
-                else
-                    data_out(data_width - 1 downto 0) <= data_help;
-                    data_out((data_width*2) - 1 downto data_width) <= data_help;
-                    data_out((data_width*3) - 1 downto data_width*2) <= data_help;
-                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;              
                 end if;
             elsif falling_edge(clock) and data_read = '0' and data_write = '1' then
                 data_vet(to_integer(unsigned(data_addr))) <= data_in;
