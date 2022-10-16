@@ -29,7 +29,7 @@ architecture behavioral of memory is
     -- needs to change the address range (first dimension) 
     type data_vet_t is array (2**addr_width - 1 downto 0) of std_logic_vector(data_width - 1 downto 0); 
     signal data_vet : data_vet_t := (others => "00000000");
-    -- signal data_help : std_logic_vector(data_width - 1 downto 0) := "00000000";
+    signal data_help : std_logic_vector(data_width - 1 downto 0) := (others => '0');
 begin
     whole_p: process (clock, data_read) is
         begin
@@ -46,17 +46,17 @@ begin
                     data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
                     data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
                     data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2));
-                    data_out((data_width*4) - 1 downto data_width*3) <= "00000000";
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;
                 elsif to_integer(unsigned(data_addr)) <= (2**addr_width - 2) then
                     data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
                     data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
-                    data_out((data_width*3) - 1 downto data_width*2) <= "00000000";
-                    data_out((data_width*4) - 1 downto data_width*3) <= "00000000";
+                    data_out((data_width*3) - 1 downto data_width*2) <= data_help;
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;
                 else
                     data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
-                    data_out((data_width*2) - 1 downto data_width) <= "00000000";
-                    data_out((data_width*3) - 1 downto data_width*2) <= "00000000";
-                    data_out((data_width*4) - 1 downto data_width*3) <= "00000000";              
+                    data_out((data_width*2) - 1 downto data_width) <= data_help;
+                    data_out((data_width*3) - 1 downto data_width*2) <= data_help;
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;              
                 end if;
             elsif falling_edge(clock) and data_read = '0' and data_write = '1' then
                 data_vet(to_integer(unsigned(data_addr))) <= data_in;

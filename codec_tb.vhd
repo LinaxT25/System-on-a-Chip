@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use std.textio.all;
 
 entity codec_tb is
 end entity;
@@ -14,6 +15,9 @@ begin
             port map (interrupt, read_signal, write_signal, valid, codec_data_in, codec_data_out);
 
     testing_memory: process is
+        file arq_r : text open read_mode is "escrita.txt";
+        variable read_line : line;
+        variable read_out : bit_vector(7 downto 0);
         type line_tv is record
             inte, rd_s, wr_s, v : std_logic;
             c_dt_in, c_dt_out : std_logic_vector(7 downto 0);
@@ -58,6 +62,16 @@ begin
                 report "YAMETE KUDASAI" & integer'image(i)
                 severity error;
             end if; 
+
+            if tb(i).wr_s = '1' and tb(i).inte = '1' then
+                if not endfile(arq_r) then
+                   readline(arq_r, read_line);
+                   read(read_line, read_out);
+                end if;
+                assert to_stdlogicvector(read_out) = tb(i).c_dt_out
+                report "Baka!" & integer'image(i)
+                severity error;   
+            end if;
         end loop;
         report "Fim dos Testes";
         wait;
