@@ -30,12 +30,12 @@ begin
             readline(arq_r, read_line);
             read(read_line, rreeaad_char);
             codec_data_out <= to_stdlogicvector(rreeaad_char);
-            valid <= '1';
+            valid <= '1'; -- verificar
         end if;
         if read_signal = '0' and write_signal = '1' and rising_edge(interrupt) then
             write(write_line, to_bitvector(codec_data_in));
             writeline(arq_w, write_line);
-            valid <= '1';
+            valid <= '1'; -- verificar
         end if;
     end process;
 end architecture;

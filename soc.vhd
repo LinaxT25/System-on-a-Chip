@@ -11,3 +11,22 @@ entity soc is
         started: in std_logic -- Start execution when '1'
     );
 end entity;
+
+architecture bla of soc is
+
+begin
+    --cpu_entity: entity work.cpu(behavioral)
+      --          generic map()
+       --         port map();
+
+    --instruction_memory: entity work.memory(behavioral)
+        --                generic map()
+                    --    port map();
+
+    --data_memory:    entity work.memory(behavioral)
+        --            generic map()
+           --         port map();
+
+   -- codec_entity:   entity work.codec(bevahioral)
+           --         port map();
+end architecture;
