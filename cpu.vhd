@@ -43,9 +43,16 @@ port(
 end entity;
 
 architecture behavioral of cpu is
-    signal inner_halt : std_logic := '0';
-    
+    signal inner_halt : std_logic := '0';  
+    signal SP_aux, IP_aux : std_logic_vector(addr_width-1 downto 0) := (others => 0);
+    signal data_aux : 
+
 begin
+    -- Precisa de um processo de inicialização que checará o clock e o valid para saber 
+    -- Quando deve ser escrito na memória de instruçoes, e controlado por aqui de forma a incrementar o 
+    -- IP, quando o valid passar mais de um ciclo de clock admitir que terminou a leitura do codec das instruções
+    -- E então começar a executar as instruçoes.
+
     sua_mae: process(clock)
         variable instruction_aux : std_logic_vector(3 downto 0);
     begin
@@ -53,8 +60,8 @@ begin
         if (inner_halt /= '1') or (rising_edge(halt)) then
             inner_halt <= '0';
             case instruction_aux is
-            -- when "0000" => -- HLT 0
-                    -- inner_halt <= '1'
+                when "0000" => -- HLT 0
+                    inner_halt <= '1';
                 when "0001" => -- IN 1
                     codec_write <= '0';
                     codec_read <= '1';
@@ -74,13 +81,15 @@ begin
                 when "0011" => -- PUSH IP 3 -- 2 bytes
                     IP(7 downto 0) <= instruction_in;
                 when "0100" => -- PUSH imm 4 -- 1 byte
-                    data_in <= instruction_in;
+                    data_in(7 downto 4) <= "0000";
+                    data_in(3 downto 0) <= instruction_in(3 downto 0);
                     data_write <= '1';
                     data_read <= '0';
-                    --att SP
+                    -- att SP
                 when "0101" => -- DROP 5
-                    --if IP
-                      --  IP <= IP - 1
+                    --IP_aux
+                    data_in <= "00000000";
+                    data_write <= '1';
                 when "0110" => -- DUP 6
                 when "1000" => -- ADD 8
                 when "1001" => -- SUB 9

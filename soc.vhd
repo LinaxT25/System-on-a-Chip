@@ -12,7 +12,7 @@ entity soc is
     );
 end entity;
 
-architecture bla of soc is
+architecture mixed of soc is
 
 begin
     --cpu_entity: entity work.cpu(behavioral)
