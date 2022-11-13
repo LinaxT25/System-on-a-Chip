@@ -45,61 +45,90 @@ end entity;
 architecture behavioral of cpu is
     signal inner_halt : std_logic := '0';  
     signal SP_aux, IP_aux : std_logic_vector(addr_width-1 downto 0) := (others => 0);
-    signal data_aux : 
+    signal setup_finished : boolean := false;
 
 begin
     -- Precisa de um processo de inicialização que checará o clock e o valid para saber 
     -- Quando deve ser escrito na memória de instruçoes, e controlado por aqui de forma a incrementar o 
     -- IP, quando o valid passar mais de um ciclo de clock admitir que terminou a leitura do codec das instruções
     -- E então começar a executar as instruçoes.
-
-    sua_mae: process(clock)
+    start: process(clock, codec_valid)
+    begin
+        if(codec_valid = '1' and rising_edge(clock)) then
+            IP_aux <= IP_aux + 1;
+        elsif(codec_valid = '0' and rising_edge(clock)) then
+            setup_finished <= true;
+        end if;
+    end process;
+    
+    cpu: process(clock, setup_finished)
         variable instruction_aux : std_logic_vector(3 downto 0);
     begin
-        instruction_aux(3 downto 0) :=  instruction_in(data_width - 1 downto data_width - 4);
-        if (inner_halt /= '1') or (rising_edge(halt)) then
-            inner_halt <= '0';
-            case instruction_aux is
-                when "0000" => -- HLT 0
-                    inner_halt <= '1';
-                when "0001" => -- IN 1
-                    codec_write <= '0';
-                    codec_read <= '1';
-                    wait on codec_valid; -- verificar
-                    data_in <= codec_data_out;
-                    -- att SP 
-                    data_write <= '1';
-                    data_read <= '0';
-                when "0010" => -- OUT 2
-                    data_read <= '1';
-                    data_write <= '0';
-                    -- att SP
-                    codec_data_in <= data_out(7 downto 0);
-                    codec_write <= '1';
-                    codec_read <= '0';
-                    wait on codec_valid; -- verificar
-                when "0011" => -- PUSH IP 3 -- 2 bytes
-                    IP(7 downto 0) <= instruction_in;
-                when "0100" => -- PUSH imm 4 -- 1 byte
-                    data_in(7 downto 4) <= "0000";
-                    data_in(3 downto 0) <= instruction_in(3 downto 0);
-                    data_write <= '1';
-                    data_read <= '0';
-                    -- att SP
-                when "0101" => -- DROP 5
-                    --IP_aux
-                    data_in <= "00000000";
-                    data_write <= '1';
-                when "0110" => -- DUP 6
-                when "1000" => -- ADD 8
-                when "1001" => -- SUB 9
-                when "1010" => -- NAND 10
-                when "1011" => -- SLT 11
-                when "1100" => -- SHL 12
-                when "1101" => -- SHR 13
-                when "1110" => -- JEQ 14
-                when "1111" => -- JMP 15
-            end case;
+        if(setup_finished = true) then
+            instruction_aux(3 downto 0) :=  instruction_in(data_width - 1 downto data_width - 4);
+
+            if (inner_halt /= '1' or halt = '0') then
+                inner_halt <= '0';
+
+                case instruction_aux is
+                    -- HLT 0
+                    when "0000" => 
+                        inner_halt <= '1';
+                    -- IN 1
+                    when "0001" => 
+                        codec_write <= '0';
+                        codec_read <= '1';
+                        wait on codec_valid; 
+                        data_in <= codec_data_out;
+                        -- att SP 
+                        data_write <= '1';
+                        data_read <= '0';
+                    -- OUT 2
+                    when "0010" => 
+                        data_read <= '1';
+                        data_write <= '0';
+                        -- att SP
+                        codec_data_in <= data_out(7 downto 0);
+                        codec_write <= '1';
+                        codec_read <= '0';
+                        wait on codec_valid;
+                    -- PUSH IP 3 
+                    when "0011" =>  
+                        IP(7 downto 0) <= instruction_in;
+                    -- PUSH imm 4 
+                    when "0100" => 
+                        data_in(7 downto 4) <= "0000";
+                        data_in(3 downto 0) <= instruction_in(3 downto 0);
+                        data_write <= '1';
+                        data_read <= '0';
+                        -- att SP
+                    -- DROP 5
+                    when "0101" => 
+                        --IP_aux
+                        data_in <= "00000000";
+                        data_write <= '1';
+                    -- DUP 6
+                    when "0110" => 
+                    -- ADD 8
+                    when "1000" => 
+                    -- SUB 9
+                    when "1001" => 
+                    -- NAND 10
+                    when "1010" => 
+                    -- SLT 11
+                    when "1011" =>
+                    -- SHL 12
+                    when "1100" =>
+                    -- SHR 13 
+                    when "1101" => 
+                    -- JEQ 14
+                    when "1110" => 
+                    -- JMP 15
+                    when "1111" => 
+                end case;
+            end if;
+        else 
+            wait on setup_finished;
         end if;
     end process;
 end architecture;
