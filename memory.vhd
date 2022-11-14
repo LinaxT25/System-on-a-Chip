@@ -31,7 +31,7 @@ architecture behavioral of memory is
     signal data_vet : data_vet_t := (others => "00000000");
     signal data_help : std_logic_vector(data_width - 1 downto 0) := (others => '0');
 begin
-    whole_p: process (clock, data_read) is
+    whole_p: process (clock, data_read, data_write, data_addr) is
         begin
             -- the read part is almost compleated, it has right casts for the range of the first dimension
             -- now, I need to see if it is going to get que right slice of each part
