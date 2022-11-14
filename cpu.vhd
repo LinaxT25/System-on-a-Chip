@@ -21,7 +21,7 @@ port(
     -- Instruction byte received from memory
     instruction_in : in std_logic_vector(data_width-1 downto 0); -- holds the instruction itself
     -- Data sent to memory when data_read = '0' and data_write = '1'
-    data_in : out std_logic_vector(data_width-1 downto 0); -- data to be written in memory
+    data_in : out std_logic_vector((data_width*2)-1 downto 0); -- data to be written in memory
     -- Data sent from memory when data_read = '1' and data_write = '0'
     data_out : in std_logic_vector((data_width*4)-1 downto 0);  -- data read from memory
 
@@ -47,7 +47,7 @@ architecture behavioral of cpu is
     signal inner_halt : std_logic := '0';  
     signal SP_aux, IP_aux : std_logic_vector(addr_width-1 downto 0) := (others => 0);
     signal setup_finished : boolean := false;
-
+    signal zero_aux : std_logic_vector(data_width-1 downto 0) := (others => '0');
 begin
     -- Precisa de um processo de inicialização que checará o clock e o valid para saber 
     -- Quando deve ser escrito na memória de instruçoes, e controlado por aqui de forma a incrementar o 
@@ -71,6 +71,10 @@ begin
         variable instruction_aux : std_logic_vector(3 downto 0);
     begin
         if(setup_finished = true) then
+            data_write <= '0;
+            codec_interrupt <= '0';
+            codec_read <= '0';
+            codec_write <= '0';
             instruction_aux(3 downto 0) :=  instruction_in(data_width - 1 downto data_width - 4);
             if (inner_halt /= '1' or halt = '0') then -- verificar essa condicao depois
                 case instruction_aux is
@@ -81,8 +85,9 @@ begin
                     when "0001" => 
                         codec_write <= '0';
                         codec_read <= '1';
-                        wait on codec_valid; 
-                        data_in <= codec_data_out;
+                        codec_interrupt <= '1';
+                        wait on codec_valid; -- verificar como proceder para a espera do mesmo ser 1 para continuar o procedimento
+                        data_in <= zero_aux && codec_data_out;
                         SP_aux <= std_logic_vector(unsigned(integer(unsigned(SP_aux)) + 1));
                         SP <= SP_aux; 
                         data_write <= '1';
