@@ -15,7 +15,7 @@ port(
  -- Data address given to memory
     data_addr : in std_logic_vector(addr_width-1 downto 0);
  -- Data sent from memory when data_read = '1' and data_write = '0'
-    data_in : in std_logic_vector(data_width-1 downto 0);
+    data_in : in std_logic_vector((data_width*2)-1 downto 0);
  -- Data sent to memory when data_read = '0' and data_write = '1'
     data_out : out std_logic_vector((data_width*4)-1 downto 0)
 );
@@ -37,29 +37,32 @@ begin
             -- now, I need to see if it is going to get que right slice of each part
             if data_read = '1' and data_write = '0' then
                 -- d 4x 7 a 0                      d 7 a 0
-                if to_integer(unsigned(data_addr)) <= (2**addr_width - 4) then
-                    data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
-                    data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
-                    data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2));
-                    data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr) + 3));
-                elsif to_integer(unsigned(data_addr)) <= (2**addr_width - 3) then
-                    data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
-                    data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
-                    data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) + 2));
-                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;
-                elsif to_integer(unsigned(data_addr)) <= (2**addr_width - 2) then
-                    data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
-                    data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) + 1));
-                    data_out((data_width*3) - 1 downto data_width*2) <= data_help;
-                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;
-                else
-                    data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr)));
+                if to_integer(unsigned(data_addr)) >= 4 then
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr)));
+                    data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) - 1));
+                    data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) - 2));
+                    data_out(data_width - 1 downto 0) <= data_vet(to_integer(unsigned(data_addr) - 3));
+                elsif to_integer(unsigned(data_addr)) = 3 then
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr)));
+                    data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) - 1));
+                    data_out((data_width*2) - 1 downto data_width) <= data_vet(to_integer(unsigned(data_addr) - 2));
+                    data_out(data_width - 1 downto 0) <= data_help
+                elsif to_integer(unsigned(data_addr)) = 2 then
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr)));
+                    data_out((data_width*3) - 1 downto data_width*2) <= data_vet(to_integer(unsigned(data_addr) - 1));
                     data_out((data_width*2) - 1 downto data_width) <= data_help;
+                    data_out(data_width - 1 downto 0) <= data_help
+                else
+                    data_out((data_width*4) - 1 downto data_width*3) <= data_vet(to_integer(unsigned(data_addr)));
                     data_out((data_width*3) - 1 downto data_width*2) <= data_help;
-                    data_out((data_width*4) - 1 downto data_width*3) <= data_help;              
+                    data_out((data_width*2) - 1 downto data_width) <= data_help;
+                    data_out(data_width - 1 downto 0) <= data_help             
                 end if;
             elsif falling_edge(clock) and data_read = '0' and data_write = '1' then
-                data_vet(to_integer(unsigned(data_addr))) <= data_in;
+                data_vet(to_integer(unsigned(data_addr))) <= data_in(data_width-1 downto 0);
+                if to_integer(unsigned(data_addr) + 1) <= (2**addr_width) then
+                    data_vet(to_integer(unsigned(data_addr)) + 1) <= data_in((data_width*2)-1 downto data_width);
+                end if;
             end if;
         end process;
 end architecture;
