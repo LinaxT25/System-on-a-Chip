@@ -47,7 +47,7 @@ architecture behavioral of cpu is
     signal inner_halt : std_logic := '0';  
     signal SP_aux, IP_aux : std_logic_vector(addr_width-1 downto 0) := (others => 0);
     signal setup_finished : boolean := false;
-    signal zero_aux : std_logic_vector(data_width-1 downto 0) := (others => '0');
+    signal zero_aux, dropped_item, op_helper : std_logic_vector(data_width-1 downto 0) := (others => '0');
 begin
     -- Precisa de um processo de inicialização que checará o clock e o valid para saber 
     -- Quando deve ser escrito na memória de instruçoes, e controlado por aqui de forma a incrementar o 
@@ -116,17 +116,32 @@ begin
                         data_read <= '0';
                     -- DROP 5
                     when "0101" => 
-                        --IP_aux
-                        data_in <= "00000000";
+                        data_read <= '1';
+                        dropped_item <= data_out((data_width*4)-1 downto (data_width*3));
+                        data_read <= '0';
+                        data_in <= zero_aux && zero_aux;
                         data_write <= '1';
+                        SP_aux <= std_logic_vector(unsigned(integer(unsigned(SP_aux)) - 1))
+                        SP <= SP_aux;
                     -- DUP 6
                     when "0110" => 
+                        SP_aux <= std_logic_vector(unsigned(integer(unsigned(SP_aux)) + 1))
+                        SP <= SP_aux;
+                        data_in <= zero_aux && dropped_item;
+                        data_write <= '1';
+                        -- verify if there is a need of putting zeros instead of the last info that was dropped
                     -- ADD 8
                     when "1000" => 
-                        --data_in <= codec_data_out + data_out;
+                        data_read <= '1';
+                        op_helper <= std_logic_vector(unsigned(integer(unsigned(data_out((data_width*4)-1 downto (data_width*3)))) + integer(unsigned(data_out((data_width*3)-1 downto (data_width*2))))));
+                        data_in <= zero_aux && op_helper;
+                        data_write <= '1';
                     -- SUB 9
-                    when "1001" => 
-                        --data_in <= codec_data_out - data_out;
+                    when "1001" =>
+                        data_read <= '1';
+                        op_helper <= std_logic_vector(unsigned(integer(unsigned(data_out((data_width*4)-1 downto (data_width*3)))) - integer(unsigned(data_out((data_width*3)-1 downto (data_width*2))))));
+                        data_in <= zero_aux && op_helper;
+                        data_write <= '1';
                     -- NAND 10
                     when "1010" => 
                         --data_in <= codec_data_out nand data_out;
