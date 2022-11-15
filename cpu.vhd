@@ -76,7 +76,7 @@ begin
             codec_read <= '0';
             codec_write <= '0';
             instruction_aux(3 downto 0) :=  instruction_in(data_width - 1 downto data_width - 4);
-            if (inner_halt /= '1' or halt = '0') then -- verificar essa condicao depois
+            if (inner_halt = '0' or halt = '0') then -- verificar essa condicao depois
                 case instruction_aux is
                     -- HLT 0
                     when "0000" => 
@@ -95,8 +95,10 @@ begin
                     -- OUT 2
                     when "0010" => 
                         data_read <= '1';
-                        data_write <= '0'; -- aqui o procedimento é mais fino, precisa saber quando se o data_out já 
-                        -- att SP           -- contem quem é pra ser escrito, as vezes n precisa ser lido pois ja esta no vetor
+                        data_write <= '0'; -- aqui o procedimento é mais fino, precisa saber quando se o data_out já
+                        SP_aux <= std_logic_vector(unsigned(integer(unsigned(SP_aux)) - 1));
+                        data_read <= '0';
+                        SP <= SP_aux;
                         codec_data_in <= data_out(7 downto 0);
                         codec_write <= '1';
                         codec_read <= '0';
