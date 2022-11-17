@@ -46,9 +46,10 @@ end entity;
 architecture behavioral of cpu is
     signal inner_halt : std_logic := '0';  
     signal SP_aux, IP_aux : std_logic_vector(addr_width-1 downto 0) := (others => '0');
-    signal setup_finished : boolean := false;
     signal zero_aux, dropped_item, op_helper : std_logic_vector(data_width-1 downto 0) := (others => '0');
+    signal setup_finished : boolean := false;
     signal op_1, op_2, op_3 : integer := 0;
+    signal last_instruction : integer range 0 to 14;
 begin
     -- Precisa de um processo de inicialização que checará o clock e o valid para saber 
     -- Quando deve ser escrito na memória de instruçoes, e controlado por aqui de forma a incrementar o 
@@ -72,50 +73,51 @@ begin
         variable instruction_aux : integer range 0 to 14;
     begin
         if(setup_finished = true) then
+            data_read <= '0';
             data_write <= '0';
             codec_interrupt <= '0';
             codec_read <= '0';
             codec_write <= '0';
+            if last_instruction = 5 then
+                SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
+                SP <= SP_aux;
+            end if;
             instruction_aux :=  to_integer(unsigned(instruction_in(data_width - 1 downto data_width - 4)));
+            last_instruction <= instruction_aux;
             if (inner_halt = '0' and halt = '0' and rising_edge(clock)) then -- verificar essa condicao depois
                 case instruction_aux is
                     when 0 => -- HLT 0
                         inner_halt <= '1';
                     -- IN 1
                     when 1 => 
-                        codec_write <= '0';
                         codec_read <= '1';
                         codec_interrupt <= '1';
                         wait on codec_valid; -- verificar como proceder para a espera do mesmo ser 1 para continuar o procedimento
-                        data_in((data_width*2)-1 downto data_width) <= zero_aux; 
+                        data_in((data_width*2)-1 downto data_width) <= zero_aux; -- most valuable one
                         data_in(data_width-1 downto 0) <= codec_data_out(7 downto 0);
                         SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) + 1, SP_aux'length));
                         SP <= SP_aux; 
                         data_write <= '1';
-                        data_read <= '0';
                     -- OUT 2
                     when 2 => 
                         data_read <= '1';
-                        data_write <= '0';
                         SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
-                        data_read <= '0';
-                        SP <= SP_aux;
-                        codec_data_in <= data_out(7 downto 0);
+                        codec_data_in <= data_out((data_width*4)-1 downto (data_width*3));
                         codec_write <= '1';
-                        codec_read <= '0';
                         codec_interrupt <= '1';
                         wait on codec_valid;
+                        SP <= SP_aux;
                     -- PUSH IP 3 
                     when 3 =>  
                         IP(7 downto 0) <= instruction_in;
                     -- PUSH imm 4 
                     when 4 => 
+                        data_in((data_width*2)-1 downto data_width) <= zero_aux;
                         data_in(7 downto 4) <= "0000";
                         data_in(3 downto 0) <= instruction_in(3 downto 0);
                         SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) + 1, SP_aux'length));
                         SP <= SP_aux;
                         data_write <= '1';
-                        data_read <= '0';
                     -- DROP 5
                     when 5 => 
                         data_read <= '1';
@@ -124,16 +126,13 @@ begin
                         data_in((data_width*2)-1 downto data_width) <= zero_aux; 
                         data_in(data_width-1 downto 0) <= zero_aux;
                         data_write <= '1';
-                        SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
-                        SP <= SP_aux;
                     -- DUP 6
                     when 6 => 
-                        SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) + 1, SP_aux'length));
-                        SP <= SP_aux;
                         data_in((data_width*2)-1 downto data_width) <= zero_aux; 
                         data_in(data_width-1 downto 0) <= dropped_item;
+                        SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) + 1, SP_aux'length));
+                        SP <= SP_aux;
                         data_write <= '1';
-                        -- verify if there is a need of putting zeros instead of the last info that was dropped
                     -- ADD 8
                     when 8 => 
                         data_read <= '1';
@@ -142,6 +141,10 @@ begin
                         op_helper <= std_logic_vector(to_unsigned(op_1 + op_2, op_helper'length));
                         data_in((data_width*2)-1 downto data_width) <= zero_aux; 
                         data_in(data_width-1 downto 0) <= op_helper;
+                        if (to_integer(unsigned(SP_aux)) - 1) > 0 then
+                            SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
+                            SP <= SP_aux;
+                        end if;
                         data_write <= '1';
                     -- SUB 9
                     when 9 =>
@@ -151,6 +154,10 @@ begin
                         op_helper <= std_logic_vector(to_unsigned(op_1 - op_2, op_helper'length));
                         data_in((data_width*2)-1 downto data_width) <= zero_aux; 
                         data_in(data_width-1 downto 0) <= op_helper;
+                        if (to_integer(unsigned(SP_aux)) - 1) > 0 then
+                            SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
+                            SP <= SP_aux;
+                        end if;
                         data_write <= '1';
                     -- NAND 10
                     --when "1010" => 
