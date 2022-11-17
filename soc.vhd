@@ -13,20 +13,24 @@ entity soc is
 end entity;
 
 architecture mixed of soc is
-
+    signal inst_read, inst_write, data_read, data_write, codec_read, codec_write, codec_interrupt, codec_valid, halt: std_logic;
+    signal codec_data_in, codec_data_out, data_in : std_logic_vector(7 downto 0);
+    signal IP, SP : std_logic_vector(15 downto 0);
+    signal data_out, instruction_out: std_logic_vector(31 downto 0);
 begin
-    --cpu_entity: entity work.cpu(behavioral)
-      --          generic map()
-       --         port map();
 
-    instruction_memory: entity work.memory(behavioral)
-                        generic map(16, 8)
-                        port map(clock, ins_read, ins_write, IP, ins_in, Times_instruction_in);
+    cpu_e:  entity work.cpu(behavioral)
+            generic map(16, 8)
+            port map(clock, halt, SP, IP, instruction_out(31 downto 24), data_in, data_out, data_read, data_write, codec_interrupt, codec_read, codec_write, codec_valid, codec_data_out, codec_data_in);
 
-    data_memory:    entity work.memory(behavioral)
-                    generic map(16, 8)
-                    port map(clock, data_read, data_write, SP, data_in, data_out);
+    IMEM:   entity work.memory(behavioral)
+            generic map(16, 8)
+            port map(clock, inst_read, inst_write, IP, codec_data_out, instruction_out);
 
-    codec_entity_firmware:   entity work.codec(bevahioral)
-                             port map(codec_interrupt, codec_read, codec_write, codec_valid, codec_data_in, codec_data_out);
+    DMEM:   entity work.memory(behavioral)
+            generic map(16, 8)
+            port map(clock, data_read, data_write, SP, data_in, data_out);
+
+    codec_e:    entity work.codec(bevahioral)
+                port map(codec_interrupt, codec_read, codec_write, codec_valid, codec_data_in, codec_data_out);
 end architecture;
