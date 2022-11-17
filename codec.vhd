@@ -18,10 +18,10 @@ entity codec is
 end entity;
 
 architecture behavioral of codec is
-    file arq_r : text open read_mode is "dados.txt";
+    file arq_r : text open read_mode is "firmware.bin";
     file arq_w: text open write_mode is "escrita.txt"; 
 begin
-    in_out: process (interrupt) is
+    in_out: process is
         variable write_aux : Bit_vector(7 downto 0);
         variable rreeaad_char : Bit_vector(7 downto 0);
         variable write_line, read_line : line; 
@@ -31,15 +31,16 @@ begin
             read(read_line, rreeaad_char);
             codec_data_out <= to_stdlogicvector(rreeaad_char);
             valid <= '1';
-            wait for 1 ns;
+            wait for 500 ps;
             valid <= '0';
         end if;
         if read_signal = '0' and write_signal = '1' and rising_edge(interrupt) then
             write(write_line, to_bitvector(codec_data_in));
             writeline(arq_w, write_line);
             valid <= '1';
-            wait for 1 ns;
+            wait for 500 ps;
             valid <= '0';
         end if;
+        wait on interrupt;
     end process;
 end architecture;

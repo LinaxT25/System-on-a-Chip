@@ -96,13 +96,14 @@ begin
                     -- OUT 2
                     when 2 => 
                         data_read <= '1';
-                        data_write <= '0'; -- aqui o procedimento é mais fino, precisa saber quando se o data_out já
+                        data_write <= '0';
                         SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
                         data_read <= '0';
                         SP <= SP_aux;
                         codec_data_in <= data_out(7 downto 0);
                         codec_write <= '1';
                         codec_read <= '0';
+                        codec_interrupt <= '1';
                         wait on codec_valid;
                     -- PUSH IP 3 
                     when 3 =>  
