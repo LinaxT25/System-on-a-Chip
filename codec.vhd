@@ -4,6 +4,9 @@ use ieee.numeric_std.all;
 use std.textio.all;
 
 entity codec is
+    generic(
+        firmware_filename: string := "firmware.bin"
+    );
     port(
         interrupt: in std_logic; -- Interrupt signal
         read_signal: in std_logic; -- Read signal
@@ -18,7 +21,7 @@ entity codec is
 end entity;
 
 architecture behavioral of codec is
-    file arq_r : text open read_mode is "firmware.bin";
+    file arq_r : text open read_mode is firmware_filename;
     file arq_w: text open write_mode is "escrita.txt"; 
 begin
     in_out: process is

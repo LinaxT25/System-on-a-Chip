@@ -12,6 +12,7 @@ architecture mixed of codec_tb is
     signal codec_data_in, codec_data_out :  std_logic_vector(7 downto 0);
 begin
     mem_t:  entity work.codec(behavioral)
+            generic map ("firmware.bin")
             port map (interrupt, read_signal, write_signal, valid, codec_data_in, codec_data_out);
 
     testing_memory: process is
