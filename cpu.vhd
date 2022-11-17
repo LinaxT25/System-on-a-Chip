@@ -1,6 +1,7 @@
 library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+use IEEE.math_real.all;
 
 entity cpu is
     generic(
@@ -168,17 +169,37 @@ begin
                         end if;
                         data_write <= '1';
                     -- NAND 10
-                    --when "1010" => 
-                        --data_in <= codec_data_out nand data_out;
+                    when 10 => 
+                        data_read <= '1';
+                        op_helper <= data_out((data_width*4)-1 downto (data_width*3)) nand data_out((data_width*3)-1 downto (data_width*2));
+                        data_in((data_width*2)-1 downto data_width) <= zero_aux; 
+                        data_in(data_width-1 downto 0) <= op_helper;
+                        if (to_integer(unsigned(SP_aux)) - 1) > 0 then
+                            SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
+                            SP <= SP_aux;
+                        end if;
+                        data_write <= '1';
                     -- SLT 11
-                    --when "1011" =>
-                        --data_in <= codec_data_out < data_out;
+                    when 11 =>
+                        data_read <= '1';
+                        op_1 <= to_integer(signed(data_out((data_width*4)-1 downto (data_width*3))));
+                        op_2 <= to_integer(signed(data_out((data_width*3)-1 downto (data_width*2))));
+                        if op_1 < op_2 then
+                            op_helper <= std_logic_vector(to_signed(1, op_helper'length));
+                        else
+                            op_helper <= std_logic_vector(to_signed(0, op_helper'length));
+                        end if;
+                        data_in((data_width*2)-1 downto data_width) <= zero_aux; 
+                        data_in(data_width-1 downto 0) <= op_helper;
+                        if (to_integer(unsigned(SP_aux)) - 1) > 0 then
+                            SP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(SP_aux)) - 1, SP_aux'length));
+                            SP <= SP_aux;
+                        end if;
+                        data_write <= '1';
                     -- SHL 12
-                    --when "1100" =>
-                        --data_in <= codec_data_out sll data_out;
+                    --when 12 =>
                     -- SHR 13 
-                    --when "1101" =>
-                        --data_in <= codec_data_out srl data_out; 
+                    
                     -- JEQ 14
                     --when "1110" => 
                         -- if(codec_data_out = data_out) then
@@ -188,7 +209,7 @@ begin
                     -- IP_aux <= codec_data_out
                     -- IP <= IP_aux
                     when others =>
-                        op_1 <= 1;
+                        op_1 <= 0;
                 end case;
             else
                 inner_halt <= '0';
