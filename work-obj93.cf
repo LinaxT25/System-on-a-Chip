@@ -1,13 +1,16 @@
 v 4
-file . "codec_tb.vhd" "9cb62185d0b789d4c1cad7341d92ae4c7f1a3510" "20221016011206.712":
-  entity codec_tb at 1( 0) + 0 on 389;
-  architecture mixed of codec_tb at 9( 130) + 0 on 390;
-file . "memory.vhd" "969e132a922fa5798966a3dbc3f6acc6b8910c20" "20221016011036.767":
-  entity memory at 1( 0) + 0 on 383;
-  architecture behavioral of memory at 24( 797) + 0 on 384;
-file . "mem_tb.vhd" "65fd15ae36b4fef26a5bb98122ebe5ab5fc8b3ca" "20221016011045.036":
-  entity mem_tb at 1( 0) + 0 on 385;
-  architecture mixed of mem_tb at 8( 107) + 0 on 386;
+file . "cpu.vhd" "13379781ca480cceacc9ea8073cc6b22ee9a7109" "20221117151239.321":
+  entity cpu at 1( 0) + 0 on 391;
+  architecture behavioral of cpu at 46( 1749) + 0 on 392;
 file . "codec.vhd" "32056399af9dc9a672d9e52e0ab3260f5e60cdb1" "20221016011201.555":
   entity codec at 1( 0) + 0 on 387;
   architecture behavioral of codec at 20( 534) + 0 on 388;
+file . "mem_tb.vhd" "65fd15ae36b4fef26a5bb98122ebe5ab5fc8b3ca" "20221016011045.036":
+  entity mem_tb at 1( 0) + 0 on 385;
+  architecture mixed of mem_tb at 8( 107) + 0 on 386;
+file . "memory.vhd" "969e132a922fa5798966a3dbc3f6acc6b8910c20" "20221016011036.767":
+  entity memory at 1( 0) + 0 on 383;
+  architecture behavioral of memory at 24( 797) + 0 on 384;
+file . "codec_tb.vhd" "9cb62185d0b789d4c1cad7341d92ae4c7f1a3510" "20221016011206.712":
+  entity codec_tb at 1( 0) + 0 on 389;
+  architecture mixed of codec_tb at 9( 130) + 0 on 390;
