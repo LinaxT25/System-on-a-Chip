@@ -54,19 +54,27 @@ begin
         variable codec_aux_valid : std_logic := '0'; -- receive the codec_valid when it's done
         variable counter : integer := 0;             -- count every clock border
     begin
+        if rising_edge(clock) then
+            codec_read <= '1';
+            codec_write <= '0';
+            codec_interrupt <= '1';
+        end if;
         if(codec_valid = '1') then
             codec_aux_valid := '1';
+            codec_interrupt <= '0';
         end if;
         if(codec_aux_valid = '1' and rising_edge(clock)) then 
             IP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(IP_aux)) + 1, IP_aux'length)); 
             IP <= IP_aux;
             codec_aux_valid := '0';
+            counter := 0;
         elsif(counter = 1 and rising_edge(clock)) then
             IP_aux <= std_logic_vector(to_unsigned(to_integer(unsigned(IP_aux)) - 1, IP_aux'length));
             IP <= IP_aux;
             setup_finished <= true;
+        elsif(codec_aux_valid = '0') then
+            counter := counter + 1;
         end if;
-        counter := counter + 1;
     end process;
     
     cpu_itself: process
